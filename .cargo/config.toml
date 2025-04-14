@@ -1,0 +1,25 @@
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# デバッグプローブ経由でフラッシュし、RTTログも使える。
+runner = "probe-rs run --chip RP2040 --protocol swd"
+# バイナリを UF2 に変換し、Pico W を USBマスストレージモードで書き込む。
+# runner = "elf2uf2-rs -d"
+
+rustflags = [
+  "-C",
+  "linker=flip-link",   # 通常のリンカの代わりに flip-link を使う（安全なリンク配置）
+  "-C",
+  "link-arg=--nmagic",  # リンカに渡すオプション。セクションをそのまま固定配置する（組み込みでよく使う）
+  "-C",
+  "link-arg=-Tlink.x",  # link.x（リンカスクリプト）を使う
+  "-C",
+  "link-arg=-Tdefmt.x", # defmtが必要とする特殊なリンカスクリプト
+]
+
+[build]
+# Cortex-M0+ マイコンに最適なターゲットです
+target = "thumbv6m-none-eabi"
+
+[env]
+# DEFMT_LOG は defmt のログ出力レベルを決める環境変数。
+# "debug" は最も詳しく出力されるモードで、trace, debug, info, warn, error があります。
+DEFMT_LOG = "debug"
